@@ -29,7 +29,7 @@ export default class Timer extends React.Component {
     return (
       <TouchableOpacity style={styles.container} {...otherProps}>
         <View style={styles.timerContent}>
-          <Text style={styles.timerText}>Go Fish</Text>
+          <Text style={styles.timerText}>Go Fishing</Text>
           <Text style={styles.timerDescription}>
             {fishingSessionInMinutes} min : {restSessionInMinutes} min
           </Text>
@@ -67,10 +67,11 @@ const styles = StyleSheet.create({
     color: Colors.grayscale.shade20,
     fontSize: 36,
     fontWeight: '700',
-    marginBottom: 10,
   },
   timerDescription: {
     color: Colors.grayscale.shade20,
     fontSize: 18,
+    fontStyle: 'italic',
+    marginTop: 10,
   },
 })
