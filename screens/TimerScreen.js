@@ -1,14 +1,7 @@
 import React from 'react'
-import {
-  Image,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native'
-import {WebBrowser} from 'expo'
+import {Image, SafeAreaView, StyleSheet, View} from 'react-native'
+import Timer from '../components/Timer'
+import Colors from '../constants/Colors'
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -23,6 +16,9 @@ export default class HomeScreen extends React.Component {
             source={require('../assets/images/daddy.png')}
             style={styles.daddyImage}
           />
+          <View style={styles.timerControls}>
+            <Timer />
+          </View>
         </SafeAreaView>
         <View style={styles.accentView} />
       </View>
@@ -32,13 +28,13 @@ export default class HomeScreen extends React.Component {
 
 const styles = StyleSheet.create({
   accentView: {
-    backgroundColor: '#51516a',
+    backgroundColor: Colors.accents.purple,
     height: '100%',
     marginTop: 250,
   },
   container: {
-    backgroundColor: '#877fa0',
-    paddingTop: 30,
+    backgroundColor: Colors.muted.purple,
+    flex: 1,
   },
   contentContainer: {
     position: 'absolute',
@@ -48,9 +44,16 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   daddyImage: {
-    height: 150,
-    marginTop: 150,
+    height: 160,
+    marginTop: 115,
     resizeMode: 'contain',
+    width: '100%',
+  },
+  timerControls: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingBottom: 50,
     width: '100%',
   },
 })
