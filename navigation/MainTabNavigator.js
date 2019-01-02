@@ -8,7 +8,7 @@ import InventoryScreen from '../screens/InventoryScreen'
 import SettingsScreen from '../screens/SettingsScreen'
 
 const TimerStack = createStackNavigator({
-  Home: TimerScreen,
+  Timer: TimerScreen,
 })
 
 TimerStack.navigationOptions = {

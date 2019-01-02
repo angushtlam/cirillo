@@ -1,25 +1,44 @@
+import PropTypes from 'prop-types'
 import React from 'react'
-import {Slider, StyleSheet} from 'react-native'
+import {Slider} from 'react-native'
+import {connect} from 'react-redux'
 import BasicScreen from '../components/BasicScreen'
 import InputFieldGroup from '../components/InputFieldGroup'
 import Colors from '../constants/Colors'
+import {
+  setFishingSessionInMinutes,
+  setRestSessionInMinutes,
+} from '../store/actions/settings'
+class SettingsScreen extends React.Component {
+  static defaultProps = {
+    onSetFishingSessionInMinutes: () => {},
+    onSetRestSessionInMinutes: () => {},
+    settings: {
+      fishingSessionInMinutes: 0,
+      restSessionInMinutes: 0,
+    },
+  }
 
-export default class SettingsScreen extends React.Component {
+  static propTypes = {
+    onSetFishingSessionInMinutes: PropTypes.func,
+    onSetRestSessionInMinutes: PropTypes.func,
+    settings: PropTypes.shape({
+      fishingSessionInMinutes: PropTypes.number,
+      restSessionInMinutes: PropTypes.number,
+    }),
+  }
+
   static navigationOptions = {
     header: null,
   }
 
-  constructor() {
-    super()
-
-    this.state = {
-      fishingSessionInMinutes: 25,
-      restSessionInMinutes: 5,
-    }
-  }
-
   render() {
-    const {fishingSessionInMinutes, restSessionInMinutes} = this.state
+    const {
+      onSetFishingSessionInMinutes,
+      onSetRestSessionInMinutes,
+      settings,
+    } = this.props
+    const {fishingSessionInMinutes, restSessionInMinutes} = settings
 
     return (
       <BasicScreen title="Settings">
@@ -32,9 +51,9 @@ export default class SettingsScreen extends React.Component {
             minimumValue={5}
             minimumTrackTintColor={Colors.accents.purple}
             step={5}
-            onValueChange={value =>
-              this.setState({fishingSessionInMinutes: value})
-            }
+            onValueChange={value => {
+              onSetFishingSessionInMinutes(value)
+            }}
             value={fishingSessionInMinutes}
           />
         </InputFieldGroup>
@@ -47,9 +66,9 @@ export default class SettingsScreen extends React.Component {
             minimumValue={5}
             minimumTrackTintColor={Colors.accents.purple}
             step={5}
-            onValueChange={value =>
-              this.setState({restSessionInMinutes: value})
-            }
+            onValueChange={value => {
+              onSetRestSessionInMinutes(value)
+            }}
             value={restSessionInMinutes}
           />
         </InputFieldGroup>
@@ -58,18 +77,20 @@ export default class SettingsScreen extends React.Component {
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 15,
-  },
-  header: {
-    fontSize: 48,
-    fontWeight: '700',
-    marginBottom: 15,
-  },
-  field: {
-    marginBottom: 15,
-  },
-  fieldHeader: {flexDirection: 'row', flexWrap: 'wrap'},
-  label: {fontWeight: '700'},
-})
+const mapStateToProps = state => ({settings: state.settings})
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onSetFishingSessionInMinutes: mins => {
+      dispatch(setFishingSessionInMinutes(mins))
+    },
+    onSetRestSessionInMinutes: mins => {
+      dispatch(setRestSessionInMinutes(mins))
+    },
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SettingsScreen)
