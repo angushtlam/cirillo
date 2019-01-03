@@ -5,8 +5,8 @@ import Colors from '../constants/Colors'
 const BasicScreen = ({children, color = Colors.accents.aqua, title}) => (
   <SafeAreaView style={styles.background}>
     <View style={styles.container}>
-      <Text style={{...styles.header, color}}>{title}</Text>
-      <View style={styles.children}>{children}</View>
+      <Text style={{...styles.title, color}}>{title}</Text>
+      <View style={styles.childrenContainer}>{children}</View>
     </View>
   </SafeAreaView>
 )
@@ -14,18 +14,20 @@ const BasicScreen = ({children, color = Colors.accents.aqua, title}) => (
 const styles = StyleSheet.create({
   background: {
     backgroundColor: Colors.grayscale.shade70,
+    flex: 1,
   },
   container: {
     padding: 15,
-    height: '100%',
+    flex: 1,
   },
   children: {
-    bottom: 15,
-    left: 15,
-    position: 'absolute',
-    width: '100%',
+    flex: 1,
   },
-  header: {
+  childrenContainer: {
+    flex: 1,
+    flexDirection: 'column-reverse',
+  },
+  title: {
     fontSize: 48,
     fontWeight: '700',
     marginBottom: 15,

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import {Slider} from 'react-native'
+import {Slider, View} from 'react-native'
 import {connect} from 'react-redux'
 import BasicScreen from '../components/BasicScreen'
 import InputFieldGroup from '../components/InputFieldGroup'
@@ -42,36 +42,38 @@ class SettingsScreen extends React.Component {
 
     return (
       <BasicScreen title="Settings">
-        <InputFieldGroup
-          title="Fishing Session Duration"
-          value={`${fishingSessionInMinutes} minutes`}
-        >
-          <Slider
-            maximumValue={120}
-            minimumValue={5}
-            minimumTrackTintColor={Colors.accents.purple}
-            step={5}
-            onValueChange={value => {
-              onSetFishingSessionInMinutes(value)
-            }}
-            value={fishingSessionInMinutes}
-          />
-        </InputFieldGroup>
-        <InputFieldGroup
-          title="Rest Session Duration"
-          value={`${restSessionInMinutes} minutes`}
-        >
-          <Slider
-            maximumValue={120}
-            minimumValue={5}
-            minimumTrackTintColor={Colors.accents.purple}
-            step={5}
-            onValueChange={value => {
-              onSetRestSessionInMinutes(value)
-            }}
-            value={restSessionInMinutes}
-          />
-        </InputFieldGroup>
+        <View>
+          <InputFieldGroup
+            title="Fishing Session Duration"
+            value={`${fishingSessionInMinutes} minutes`}
+          >
+            <Slider
+              maximumValue={120}
+              minimumValue={5}
+              minimumTrackTintColor={Colors.accents.purple}
+              step={5}
+              onValueChange={value => {
+                onSetFishingSessionInMinutes(value)
+              }}
+              value={fishingSessionInMinutes}
+            />
+          </InputFieldGroup>
+          <InputFieldGroup
+            title="Rest Session Duration"
+            value={`${restSessionInMinutes} minutes`}
+          >
+            <Slider
+              maximumValue={120}
+              minimumValue={5}
+              minimumTrackTintColor={Colors.accents.purple}
+              step={5}
+              onValueChange={value => {
+                onSetRestSessionInMinutes(value)
+              }}
+              value={restSessionInMinutes}
+            />
+          </InputFieldGroup>
+        </View>
       </BasicScreen>
     )
   }

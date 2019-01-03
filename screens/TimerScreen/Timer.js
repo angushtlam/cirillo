@@ -2,8 +2,8 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import {Svg} from 'expo'
-import Colors from '../constants/Colors'
-import Layout from '../constants/Layout'
+import Colors from '../../constants/Colors'
+import Layout from '../../constants/Layout'
 
 const width = Layout.window.width
 const {Circle} = Svg

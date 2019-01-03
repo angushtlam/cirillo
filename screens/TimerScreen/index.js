@@ -2,16 +2,22 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import {connect} from 'react-redux'
 import {Image, SafeAreaView, StyleSheet, View} from 'react-native'
-import Timer from '../components/Timer'
-import Colors from '../constants/Colors'
+import Timer from './Timer'
+import Colors from '../../constants/Colors'
+import {addItem} from '../../store/actions/inventory'
+import {getRandomFish} from '../../game/fish'
 
 class TimerScreen extends React.Component {
   static defaultProps = {
-    fishingSessionInMinutes: 0,
-    restSessionInMinutes: 0,
+    onAddItem: () => {},
+    settings: {
+      fishingSessionInMinutes: 0,
+      restSessionInMinutes: 0,
+    },
   }
 
   static propTypes = {
+    onAddItem: PropTypes.func,
     settings: PropTypes.shape({
       fishingSessionInMinutes: PropTypes.number,
       restSessionInMinutes: PropTypes.number,
@@ -23,19 +29,22 @@ class TimerScreen extends React.Component {
   }
 
   render() {
-    const {settings} = this.props
+    const {onAddItem, settings} = this.props
     const {fishingSessionInMinutes, restSessionInMinutes} = settings
 
     return (
       <View style={styles.container}>
         <SafeAreaView style={styles.contentContainer}>
           <Image
-            source={require('../assets/images/daddy.png')}
+            source={require('../../assets/images/daddy.png')}
             style={styles.daddyImage}
           />
           <View style={styles.timerControls}>
             <Timer
               fishingSessionInMinutes={fishingSessionInMinutes}
+              onPress={() => {
+                onAddItem(getRandomFish(Math.floor(Math.random() * 5)))
+              }}
               restSessionInMinutes={restSessionInMinutes}
             />
           </View>
@@ -81,4 +90,13 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({settings: state.settings})
 
-export default connect(mapStateToProps)(TimerScreen)
+const mapDispatchToProps = dispatch => ({
+  onAddItem: item => {
+    dispatch(addItem(item))
+  },
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TimerScreen)
