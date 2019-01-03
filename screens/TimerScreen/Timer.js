@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import {Svg} from 'expo'
+import {getReadableTime, getTimerState, timerStates} from './utils'
 import Colors from '../../constants/Colors'
 import Layout from '../../constants/Layout'
 
@@ -10,13 +11,77 @@ const {Circle} = Svg
 
 export default class Timer extends React.Component {
   static defaultProps = {
+    fishingSessionEndTimestamp: 0,
     fishingSessionInMinutes: 0,
+    restSessionEndTimestamp: 0,
     restSessionInMinutes: 0,
   }
 
   static propTypes = {
+    fishingSessionEndTimestamp: PropTypes.number,
     fishingSessionInMinutes: PropTypes.number,
+    restSessionEndTimestamp: PropTypes.number,
     restSessionInMinutes: PropTypes.number,
+  }
+
+  intervalId = 0
+
+  componentDidMount() {
+    this.intervalId = setInterval(() => {
+      if (!!this.props) {
+        const {fishingSessionEndTimestamp, restSessionEndTimestamp} = this.props
+
+        if (
+          getTimerState(fishingSessionEndTimestamp, restSessionEndTimestamp) !==
+          timerStates.NOT_STARTED_FISHING
+        ) {
+          this.forceUpdate()
+        }
+      }
+    }, 500)
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.intervalId)
+  }
+
+  getTimerText = () => {
+    const {fishingSessionEndTimestamp, restSessionEndTimestamp} = this.props
+
+    switch (
+      getTimerState(fishingSessionEndTimestamp, restSessionEndTimestamp)
+    ) {
+      case timerStates.NOT_STARTED_FISHING:
+        return 'Go Fishing'
+      case timerStates.IN_FISHING:
+        return 'Fishing...'
+      case timerStates.IN_REST:
+        return 'Resting...'
+    }
+
+    return 'Go Fishing'
+  }
+
+  getTimerDescription = () => {
+    const {
+      fishingSessionEndTimestamp,
+      fishingSessionInMinutes,
+      restSessionEndTimestamp,
+      restSessionInMinutes,
+    } = this.props
+
+    switch (
+      getTimerState(fishingSessionEndTimestamp, restSessionEndTimestamp)
+    ) {
+      case timerStates.NOT_STARTED_FISHING:
+        return `${fishingSessionInMinutes} min : ${restSessionInMinutes} min`
+      case timerStates.IN_FISHING:
+        return `${getReadableTime(fishingSessionEndTimestamp - Date.now())}`
+      case timerStates.IN_REST:
+        return `${getReadableTime(restSessionEndTimestamp - Date.now())}`
+    }
+
+    return `${fishingSessionInMinutes} min : ${restSessionInMinutes} min`
   }
 
   render() {
@@ -29,9 +94,9 @@ export default class Timer extends React.Component {
     return (
       <TouchableOpacity style={styles.container} {...otherProps}>
         <View style={styles.timerContent}>
-          <Text style={styles.timerText}>Go Fishing</Text>
+          <Text style={styles.timerText}>{this.getTimerText()}</Text>
           <Text style={styles.timerDescription}>
-            {fishingSessionInMinutes} min : {restSessionInMinutes} min
+            {this.getTimerDescription()}
           </Text>
         </View>
         <View>
@@ -63,15 +128,15 @@ const styles = StyleSheet.create({
     width: width * 0.75,
     zIndex: 1,
   },
-  timerText: {
-    color: Colors.grayscale.shade20,
-    fontSize: 36,
-    fontWeight: '700',
-  },
   timerDescription: {
     color: Colors.grayscale.shade20,
     fontSize: 18,
     fontStyle: 'italic',
     marginTop: 10,
+  },
+  timerText: {
+    color: Colors.grayscale.shade20,
+    fontSize: 36,
+    fontWeight: '700',
   },
 })

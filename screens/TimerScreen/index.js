@@ -3,8 +3,15 @@ import React from 'react'
 import {connect} from 'react-redux'
 import {Image, SafeAreaView, StyleSheet, View} from 'react-native'
 import Timer from './Timer'
+import {timerStates, getTimerState} from './utils'
 import Colors from '../../constants/Colors'
 import {addItem} from '../../store/actions/inventory'
+import {
+  clearFishingSession,
+  clearRestSession,
+  setFishingSessionEndTimestamp,
+  setRestSessionEndTimestamp,
+} from '../../store/actions/timer'
 import {getRandomFish} from '../../game/fish'
 
 class TimerScreen extends React.Component {
@@ -14,6 +21,10 @@ class TimerScreen extends React.Component {
       fishingSessionInMinutes: 0,
       restSessionInMinutes: 0,
     },
+    timer: {
+      fishingSessionEndTimestamp: -1,
+      restSessionEndTimestamp: -1,
+    },
   }
 
   static propTypes = {
@@ -22,15 +33,64 @@ class TimerScreen extends React.Component {
       fishingSessionInMinutes: PropTypes.number,
       restSessionInMinutes: PropTypes.number,
     }),
+    timer: PropTypes.shape({
+      fishingSessionEndTimestamp: PropTypes.number,
+      restSessionEndTimestamp: PropTypes.number,
+    }),
   }
 
   static navigationOptions = {
     header: null,
   }
 
-  render() {
-    const {onAddItem, settings} = this.props
+  handleTimerPress = () => {
+    const {
+      onAddItem,
+      onClearFishingSession,
+      onClearRestSession,
+      onSetFishingSessionEndTimestamp,
+      onSetRestSessionEndTimestamp,
+      settings,
+      timer,
+    } = this.props
     const {fishingSessionInMinutes, restSessionInMinutes} = settings
+    const {fishingSessionEndTimestamp, restSessionEndTimestamp} = timer
+
+    switch (
+      getTimerState(fishingSessionEndTimestamp, restSessionEndTimestamp)
+    ) {
+      case timerStates.NOT_STARTED_FISHING:
+        onClearRestSession()
+        onSetFishingSessionEndTimestamp(
+          Date.now() + 60000 * fishingSessionInMinutes
+        )
+        return
+      case timerStates.IN_FISHING:
+        if (Date.now() > fishingSessionEndTimestamp) {
+          onAddItem(getRandomFish(Math.floor(Math.random() * 5)))
+          onClearFishingSession()
+          onSetRestSessionEndTimestamp(
+            Date.now() + 60000 * restSessionInMinutes
+          )
+        } else {
+          onClearFishingSession()
+          onClearRestSession()
+        }
+        return
+      case timerStates.IN_REST:
+        if (Date.now() > restSessionEndTimestamp) {
+          onAddItem(getRandomFish(Math.floor(Math.random() * 5)))
+        }
+        onClearFishingSession()
+        onClearRestSession()
+        return
+    }
+  }
+
+  render() {
+    const {settings, timer} = this.props
+    const {fishingSessionInMinutes, restSessionInMinutes} = settings
+    const {fishingSessionEndTimestamp, restSessionEndTimestamp} = timer
 
     return (
       <View style={styles.container}>
@@ -42,10 +102,10 @@ class TimerScreen extends React.Component {
           <View style={styles.timerControls}>
             <Timer
               fishingSessionInMinutes={fishingSessionInMinutes}
-              onPress={() => {
-                onAddItem(getRandomFish(Math.floor(Math.random() * 5)))
-              }}
+              fishingSessionEndTimestamp={fishingSessionEndTimestamp}
+              onPress={this.handleTimerPress}
               restSessionInMinutes={restSessionInMinutes}
+              restSessionEndTimestamp={restSessionEndTimestamp}
             />
           </View>
         </SafeAreaView>
@@ -88,11 +148,26 @@ const styles = StyleSheet.create({
   },
 })
 
-const mapStateToProps = state => ({settings: state.settings})
+const mapStateToProps = state => ({
+  settings: state.settings,
+  timer: state.timer,
+})
 
 const mapDispatchToProps = dispatch => ({
   onAddItem: item => {
     dispatch(addItem(item))
+  },
+  onClearFishingSession: () => {
+    dispatch(clearFishingSession())
+  },
+  onClearRestSession: () => {
+    dispatch(clearRestSession())
+  },
+  onSetFishingSessionEndTimestamp: ms => {
+    dispatch(setFishingSessionEndTimestamp(ms))
+  },
+  onSetRestSessionEndTimestamp: ms => {
+    dispatch(setRestSessionEndTimestamp(ms))
   },
 })
 
