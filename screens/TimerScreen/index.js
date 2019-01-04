@@ -67,7 +67,7 @@ class TimerScreen extends React.Component {
         return
       case timerStates.IN_FISHING:
         if (Date.now() > fishingSessionEndTimestamp) {
-          onAddItem(getRandomFish(Math.floor(Math.random() * 5)))
+          onAddItem(getRandomFish(1 + Math.floor(Math.random() * 5)))
           onClearFishingSession()
           onSetRestSessionEndTimestamp(
             Date.now() + 60000 * restSessionInMinutes
@@ -79,7 +79,7 @@ class TimerScreen extends React.Component {
         return
       case timerStates.IN_REST:
         if (Date.now() > restSessionEndTimestamp) {
-          onAddItem(getRandomFish(Math.floor(Math.random() * 5)))
+          onAddItem(getRandomFish(1 + Math.floor(Math.random() * 5)))
         }
         onClearFishingSession()
         onClearRestSession()
