@@ -1,7 +1,9 @@
 {
   "expo": {
     "name": "Cirillo",
-    "slug": "Cirillo",
+    "slug": "cirillo",
+    "description": "Pomodoro technique timer masked as a fishing clicker game 🍅",
+    "githubUrl": "https://github.com/angushtlam/cirillo",
     "privacy": "public",
     "sdkVersion": "31.0.0",
     "platforms": [
