@@ -3,39 +3,49 @@ import React from 'react'
 import {connect} from 'react-redux'
 import {Image, SafeAreaView, StyleSheet, View} from 'react-native'
 import Timer from './Timer'
-import {timerStates, getTimerState} from './utils'
 import Colors from '../../constants/Colors'
 import {addItem} from '../../store/actions/inventory'
 import {
-  clearFishingSession,
-  clearRestSession,
-  setFishingSessionEndTimestamp,
-  setRestSessionEndTimestamp,
+  clearSession,
+  setEndTimestamp,
+  setStartTimestamp,
+  setTimerState,
+  timerStates,
 } from '../../store/actions/timer'
 import {getRandomFish} from '../../game/fish'
 
 class TimerScreen extends React.Component {
   static defaultProps = {
     onAddItem: () => {},
+    onClearSession: () => {},
+    onSetEndTimestamp: () => {},
+    onSetStartTimestamp: () => {},
+    onSetTimerState: () => {},
     settings: {
       fishingSessionInMinutes: 0,
       restSessionInMinutes: 0,
     },
     timer: {
-      fishingSessionEndTimestamp: -1,
-      restSessionEndTimestamp: -1,
+      endTimestamp: -1,
+      startTimestamp: -1,
+      timerState: timerStates.NOT_STARTED_FISHING,
     },
   }
 
   static propTypes = {
     onAddItem: PropTypes.func,
+    onClearSession: PropTypes.func,
+    onSetEndTimestamp: PropTypes.func,
+    onSetStartTimestamp: PropTypes.func,
+    onSetTimerState: PropTypes.func,
     settings: PropTypes.shape({
       fishingSessionInMinutes: PropTypes.number,
       restSessionInMinutes: PropTypes.number,
     }),
     timer: PropTypes.shape({
-      fishingSessionEndTimestamp: PropTypes.number,
-      restSessionEndTimestamp: PropTypes.number,
+      endTimestamp: PropTypes.number,
+      startTimestamp: PropTypes.number,
+      timerState: PropTypes.string,
     }),
   }
 
@@ -43,54 +53,89 @@ class TimerScreen extends React.Component {
     header: null,
   }
 
+  intervalId = 0
+  state = {
+    timerDurationInMs: -1,
+  }
+
+  componentDidMount() {
+    this.intervalId = setInterval(() => {
+      if (!!this.props) {
+        const {onSetTimerState, timer} = this.props
+        const {endTimestamp, timerState} = timer
+
+        const timerDurationInMs = endTimestamp - Date.now()
+
+        // Update the timer state if enough time has passed.
+        if (timerDurationInMs < 0) {
+          if (
+            timerState === timerStates.COMPLETED_FISHING ||
+            timerState === timerStates.COMPLETED_REST
+          ) {
+            return
+          } else if (timerState === timerStates.IN_FISHING) {
+            console.log(timerDurationInMs)
+            onSetTimerState(timerStates.COMPLETED_FISHING)
+          } else if (timerState === timerStates.IN_REST) {
+            console.log(timerDurationInMs)
+            onSetTimerState(timerStates.COMPLETED_REST)
+          }
+        } else {
+          // Timer duration is calculated here for the timer to render
+          this.setState({timerDurationInMs})
+        }
+      }
+    }, 500)
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.intervalId)
+  }
+
   handleTimerPress = () => {
     const {
       onAddItem,
-      onClearFishingSession,
-      onClearRestSession,
-      onSetFishingSessionEndTimestamp,
-      onSetRestSessionEndTimestamp,
+      onClearSession,
+      onSetEndTimestamp,
+      onSetStartTimestamp,
+      onSetTimerState,
       settings,
       timer,
     } = this.props
     const {fishingSessionInMinutes, restSessionInMinutes} = settings
-    const {fishingSessionEndTimestamp, restSessionEndTimestamp} = timer
+    const {timerState} = timer
+    const ms = Date.now()
 
-    switch (
-      getTimerState(fishingSessionEndTimestamp, restSessionEndTimestamp)
-    ) {
+    switch (timerState) {
       case timerStates.NOT_STARTED_FISHING:
-        onClearRestSession()
-        onSetFishingSessionEndTimestamp(
-          Date.now() + 60000 * fishingSessionInMinutes
-        )
+        onSetEndTimestamp(ms + 60000 * fishingSessionInMinutes)
+        onSetStartTimestamp(ms)
+        onSetTimerState(timerStates.IN_FISHING)
         return
       case timerStates.IN_FISHING:
-        if (Date.now() > fishingSessionEndTimestamp) {
-          onAddItem(getRandomFish(1 + Math.floor(Math.random() * 5)))
-          onClearFishingSession()
-          onSetRestSessionEndTimestamp(
-            Date.now() + 60000 * restSessionInMinutes
-          )
-        } else {
-          onClearFishingSession()
-          onClearRestSession()
-        }
+        onClearSession()
+        return
+      case timerStates.COMPLETED_FISHING:
+        onAddItem(getRandomFish(1 + Math.floor(Math.random() * 5)))
+        onSetEndTimestamp(ms + 60000 * restSessionInMinutes)
+        onSetStartTimestamp(ms)
+        onSetTimerState(timerStates.IN_REST)
         return
       case timerStates.IN_REST:
-        if (Date.now() > restSessionEndTimestamp) {
-          onAddItem(getRandomFish(1 + Math.floor(Math.random() * 5)))
-        }
-        onClearFishingSession()
-        onClearRestSession()
+        onClearSession()
+        return
+      case timerStates.COMPLETED_REST:
+        onAddItem(getRandomFish(1 + Math.floor(Math.random() * 5)))
+        onSetTimerState(timerStates.NOT_STARTED_FISHING)
         return
     }
   }
 
   render() {
     const {settings, timer} = this.props
+    const {timerDurationInMs} = this.state
     const {fishingSessionInMinutes, restSessionInMinutes} = settings
-    const {fishingSessionEndTimestamp, restSessionEndTimestamp} = timer
+    const {timerState} = timer
 
     return (
       <View style={styles.container}>
@@ -102,10 +147,10 @@ class TimerScreen extends React.Component {
           <View style={styles.timerControls}>
             <Timer
               fishingSessionInMinutes={fishingSessionInMinutes}
-              fishingSessionEndTimestamp={fishingSessionEndTimestamp}
               onPress={this.handleTimerPress}
               restSessionInMinutes={restSessionInMinutes}
-              restSessionEndTimestamp={restSessionEndTimestamp}
+              timerDurationInMs={timerDurationInMs}
+              timerState={timerState}
             />
           </View>
         </SafeAreaView>
@@ -157,17 +202,17 @@ const mapDispatchToProps = dispatch => ({
   onAddItem: item => {
     dispatch(addItem(item))
   },
-  onClearFishingSession: () => {
-    dispatch(clearFishingSession())
+  onClearSession: () => {
+    dispatch(clearSession())
   },
-  onClearRestSession: () => {
-    dispatch(clearRestSession())
+  onSetEndTimestamp: ms => {
+    dispatch(setEndTimestamp(ms))
   },
-  onSetFishingSessionEndTimestamp: ms => {
-    dispatch(setFishingSessionEndTimestamp(ms))
+  onSetStartTimestamp: ms => {
+    dispatch(setStartTimestamp(ms))
   },
-  onSetRestSessionEndTimestamp: ms => {
-    dispatch(setRestSessionEndTimestamp(ms))
+  onSetTimerState: state => {
+    dispatch(setTimerState(state))
   },
 })
 

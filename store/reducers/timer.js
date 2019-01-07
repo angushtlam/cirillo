@@ -1,36 +1,40 @@
 import {
-  CLEAR_FISHING_SESSION,
-  CLEAR_REST_SESSION,
-  SET_FISHING_SESSION_END_TIMESTAMP,
-  SET_REST_SESSION_END_TIMESTAMP,
+  CLEAR_SESSION,
+  SET_END_TIMESTAMP,
+  SET_START_TIMESTAMP,
+  SET_TIMER_STATE,
+  timerStates,
 } from '../actions/timer'
 
 const initialState = {
-  fishingSessionEndTimestamp: -1,
-  restSessionEndTimestamp: -1,
+  endTimestamp: -1,
+  startTimestamp: -1,
+  timerState: timerStates.NOT_STARTED_FISHING,
 }
 
 export default function settings(state = initialState, action) {
   switch (action.type) {
-    case CLEAR_FISHING_SESSION:
+    case CLEAR_SESSION:
       return {
         ...state,
-        fishingSessionEndTimestamp: -1,
+        endTimestamp: -1,
+        startTimestamp: -1,
+        timerState: timerStates.NOT_STARTED_FISHING,
       }
-    case CLEAR_REST_SESSION:
+    case SET_END_TIMESTAMP:
       return {
         ...state,
-        restSessionEndTimestamp: -1,
+        endTimestamp: action.value,
       }
-    case SET_FISHING_SESSION_END_TIMESTAMP:
+    case SET_START_TIMESTAMP:
       return {
         ...state,
-        fishingSessionEndTimestamp: action.value,
+        startTimestamp: action.value,
       }
-    case SET_REST_SESSION_END_TIMESTAMP:
+    case SET_TIMER_STATE:
       return {
         ...state,
-        restSessionEndTimestamp: action.value,
+        timerState: action.timerState,
       }
   }
 

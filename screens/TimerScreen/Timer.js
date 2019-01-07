@@ -2,61 +2,45 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import {Svg} from 'expo'
-import {getReadableTime, getTimerState, timerStates} from './utils'
+import {getReadableTime} from './utils'
 import Colors from '../../constants/Colors'
 import Layout from '../../constants/Layout'
+import {timerStates} from '../../store/actions/timer'
 
 const width = Layout.window.width
 const {Circle} = Svg
 
 export default class Timer extends React.Component {
   static defaultProps = {
-    fishingSessionEndTimestamp: 0,
+    endTimestamp: 0,
     fishingSessionInMinutes: 0,
-    restSessionEndTimestamp: 0,
     restSessionInMinutes: 0,
+    startTimestamp: 0,
+    timerState: timerStates.NOT_STARTED_FISHING,
   }
 
   static propTypes = {
-    fishingSessionEndTimestamp: PropTypes.number,
+    endTimestamp: PropTypes.number,
     fishingSessionInMinutes: PropTypes.number,
-    restSessionEndTimestamp: PropTypes.number,
     restSessionInMinutes: PropTypes.number,
-  }
-
-  intervalId = 0
-
-  componentDidMount() {
-    this.intervalId = setInterval(() => {
-      if (!!this.props) {
-        const {fishingSessionEndTimestamp, restSessionEndTimestamp} = this.props
-
-        if (
-          getTimerState(fishingSessionEndTimestamp, restSessionEndTimestamp) !==
-          timerStates.NOT_STARTED_FISHING
-        ) {
-          this.forceUpdate()
-        }
-      }
-    }, 500)
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.intervalId)
+    startTimestamp: PropTypes.number,
+    timerState: PropTypes.string,
   }
 
   getTimerText = () => {
-    const {fishingSessionEndTimestamp, restSessionEndTimestamp} = this.props
+    const {timerState} = this.props
 
-    switch (
-      getTimerState(fishingSessionEndTimestamp, restSessionEndTimestamp)
-    ) {
+    switch (timerState) {
       case timerStates.NOT_STARTED_FISHING:
         return 'Go Fishing'
       case timerStates.IN_FISHING:
         return 'Fishing...'
+      case timerStates.COMPLETED_FISHING:
+        return 'Done Fishing'
       case timerStates.IN_REST:
         return 'Resting...'
+      case timerStates.COMPLETED_REST:
+        return 'Done Resting'
     }
 
     return 'Go Fishing'
@@ -64,21 +48,21 @@ export default class Timer extends React.Component {
 
   getTimerDescription = () => {
     const {
-      fishingSessionEndTimestamp,
       fishingSessionInMinutes,
-      restSessionEndTimestamp,
       restSessionInMinutes,
+      timerDurationInMs,
+      timerState,
     } = this.props
 
-    switch (
-      getTimerState(fishingSessionEndTimestamp, restSessionEndTimestamp)
-    ) {
+    switch (timerState) {
       case timerStates.NOT_STARTED_FISHING:
         return `${fishingSessionInMinutes} min : ${restSessionInMinutes} min`
       case timerStates.IN_FISHING:
-        return `${getReadableTime(fishingSessionEndTimestamp - Date.now())}`
       case timerStates.IN_REST:
-        return `${getReadableTime(restSessionEndTimestamp - Date.now())}`
+        return `${getReadableTime(timerDurationInMs)}`
+      case timerStates.COMPLETED_FISHING:
+      case timerStates.COMPLETED_REST:
+        return 'Completed'
     }
 
     return `${fishingSessionInMinutes} min : ${restSessionInMinutes} min`
