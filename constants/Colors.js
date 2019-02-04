@@ -1,15 +1,15 @@
 const accents = {
-  purple: '#5248c4',
-  blue: '#1867e0',
-  aqua: '#1ea8a8',
-  pink: '#ba2e4f',
+  purple: 'rgb(82, 72, 196)',
+  blue: 'rgb(24, 103, 224)',
+  aqua: 'rgb(30, 168, 168)',
+  pink: 'rgb(186, 46, 79)',
 }
 
 const muted = {
-  purple: '#312e54',
-  blue: '#233663',
-  aqua: '#235663',
-  pink: '#542f4a',
+  purple: 'rgb(49, 46, 84)',
+  blue: 'rgb(35, 54, 99)',
+  aqua: 'rgb(35, 86, 99)',
+  pink: 'rgb(84, 47, 74)',
 }
 
 const grayscale = {
